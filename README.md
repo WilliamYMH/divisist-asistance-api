@@ -4,10 +4,17 @@ Proyecto simple que haciendo uso de webscrapping, consulta las notas de las mate
 - Api endpoint:
 ```
 [POST]
-api/v1.0/get-notas-materias
+api/v1.0/login
 {
     "usuario":"",
     "password":"",
     "documento":""
 }
+
+[POST]
+api/v1.0/get-notas-materias
+
+[POST]
+api/v1.0/logout
+
 ```
