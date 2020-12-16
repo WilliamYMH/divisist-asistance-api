@@ -1,8 +1,12 @@
 import time
-from flask import Flask, request, jsonify, session
-app = Flask(__name__)
+from flask import Flask, render_template, request, jsonify, make_response, session
+from flask_cors import CORS, cross_origin
 import os
 from .main import *
+
+app = Flask(__name__)
+CORS(app, support_credentials=True)
+
 
 app.secret_key = os.environ.get('SECRET_KEY')
 
@@ -15,33 +19,35 @@ def index():
     user_agent = request.headers.get('User-Agent')
     return 'Api web service - divisist asistance'
 
-@app.route("/api/v1.0/login", methods=['POST'])
+@app.route("/api/v1.0/login", methods=['OPTIONS', 'POST'])
+@cross_origin()
 def login():
     session.clear()
-    usuario = request.form.get('usuario')
-    password = request.form.get('password')
-    documento = request.form.get('documento')
-    documento2 = '*'*len(documento)
-    payload = {
-        'login':'1', 
-        'miip':'',
-        'miipreal':'',
-        'usuario':usuario,
-        'documento2':documento2,
-        'password':password,
-        'documento':documento,
-    }
-    session_ = initialize()
-    if iniciar_sesion(session_, payload):    
-        session["usuario"] = usuario
-        session["password"] = password
-        session["documento"] = documento
-        session["auth"] = 1
-        cerrar_sesion(session_)
-        return jsonify(succes=True)
-    
-    session["auth"] = 0
-    return jsonify(succes=False)
+    if request.method == 'POST':
+        usuario = request.json.get('usuario')
+        password = request.json.get('password')
+        documento = request.json.get('documento')
+        documento2 = '*'*len(documento)
+        payload = {
+            'login':'1', 
+            'miip':'',
+            'miipreal':'',
+            'usuario':usuario,
+            'documento2':documento2,
+            'password':password,
+            'documento':documento,
+        }
+        session_ = initialize()
+        if iniciar_sesion(session_, payload):    
+            session["usuario"] = usuario
+            session["password"] = password
+            session["documento"] = documento
+            session["auth"] = 1
+            cerrar_sesion(session_)
+            return jsonify(succes=True)
+        
+        session["auth"] = 0
+        return jsonify(succes=False)
 
 @app.route("/api/v1.0/logout", methods=['POST'])
 def logout():
@@ -86,4 +92,4 @@ def get_notas_materias():
     return jsonify(succes=False)
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000)
