@@ -11,8 +11,15 @@ api/v1.0/login
     "documento":""
 }
 
-[POST]
+[GET]
 api/v1.0/get-notas-materias
+
+[POST]
+/api/v1.0/get-nota-by-voice
+{
+    "data":"",
+    "value":"",
+}
 
 [POST]
 api/v1.0/logout

@@ -3,11 +3,10 @@ from flask import Flask, render_template, request, jsonify, make_response, sessi
 from flask_cors import CORS, cross_origin
 import os
 from .main import *
+from flask_session import Session
+import redis
 
 app = Flask(__name__)
-CORS(app, support_credentials=True)
-
-
 app.secret_key = os.environ.get('SECRET_KEY')
 
 @app.before_request
@@ -38,7 +37,7 @@ def login():
             'documento':documento,
         }
         session_ = initialize()
-        if iniciar_sesion(session_, payload):    
+        if iniciar_sesion(session_, payload):  
             session["usuario"] = usuario
             session["password"] = password
             session["documento"] = documento
@@ -56,7 +55,8 @@ def logout():
     session["auth"] = 0
     return jsonify(succes=True)
 
-@app.route('/api/v1.0/get-notas-materias', methods=['POST'])
+
+@app.route('/api/v1.0/get-notas-materias', methods=['GET'])
 def get_notas_materias():
     try:
         usuario = session["usuario"]
@@ -91,5 +91,25 @@ def get_notas_materias():
         return jsonify(success=True, result=map_result)
     return jsonify(succes=False)
 
+@app.route("/api/v1.0/get-nota-by-voice", methods=['POST'])
+def get_nota_by_voice():
+    data = request.json.get('data')
+    value = request.json.get('value')    
+    res = get_materia_by_value(data, value)
+    if res:
+        return jsonify(succes=True, result=res)
+    return jsonify(succes=False)
+
+
 if __name__ == '__main__':
+    #secret key
+    app.secret_key = os.environ.get('SECRET_KEY')
+    CORS(app, support_credentials=True)
+
+    #config session
+    SESSION_TYPE = 'redis'
+    app.config['SESSION_REDIS'] = redis.from_url(os.environ.get('REDIS_URL'))
+    sess = Session()
+    sess.init_app(app)
+    app.debug = True
     app.run(host='0.0.0.0', port=5000)
