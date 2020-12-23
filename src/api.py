@@ -57,41 +57,46 @@ def logout():
     return jsonify(succes=True)
 
 
-@app.route('/api/v1.0/get-notas-materias', methods=['GET'])
+@app.route('/api/v1.0/get-notas-materias', methods=['POST'])
 @cross_origin()
 def get_notas_materias():
-    try:
-        usuario = session["usuario"]
-        password = session["password"]
-        documento = session["documento"]
-        auth = session["auth"]
-    except:
-        auth = 0
-    if auth == 0:
+    if request.method == 'POST':
+        app.logger.info(request.json.get('usuario'))
+        try:
+            usuario = request.json.get('usuario')
+            password = request.json.get('password')
+            documento = request.json.get('documento')
+            app.logger.info(request.json.get('usuario'))
+            app.logger.info(request.json.get('password'))
+            app.logger.info(request.json.get('documento'))
+            auth = 1
+        except:
+            auth = 0
+        if auth == 0:
+            return jsonify(succes=False)
+            
+        session_ = initialize()
+        documento2 = '*'*len(documento)
+        payload = {
+            'login':'1', 
+            'miip':'',
+            'miipreal':'',
+            'usuario':usuario,
+            'documento2':documento2,
+            'password':password,
+            'documento':documento,
+        }
+        if iniciar_sesion(session_, payload):    
+            nombres_materias = get_nombres_materias(session_)
+            notas_parciales = get_notas_parciales(session_)
+            map_result = {}
+            i=0
+            for materia in nombres_materias:
+                map_result[materia] = notas_parciales[i]
+                i+=1
+            cerrar_sesion(session_)
+            return jsonify(success=True, result=map_result)
         return jsonify(succes=False)
-         
-    session_ = initialize()
-    documento2 = '*'*len(documento)
-    payload = {
-        'login':'1', 
-        'miip':'',
-        'miipreal':'',
-        'usuario':usuario,
-        'documento2':documento2,
-        'password':password,
-        'documento':documento,
-    }
-    if iniciar_sesion(session_, payload):    
-        nombres_materias = get_nombres_materias(session_)
-        notas_parciales = get_notas_parciales(session_)
-        map_result = {}
-        i=0
-        for materia in nombres_materias:
-            map_result[materia] = notas_parciales[i]
-            i+=1
-        cerrar_sesion(session_)
-        return jsonify(success=True, result=map_result)
-    return jsonify(succes=False)
 
 @app.route("/api/v1.0/get-nota-by-voice", methods=['POST'])
 @cross_origin()
@@ -110,7 +115,7 @@ if __name__ == '__main__':
     CORS(app, support_credentials=True)
 
     #config session
-    SESSION_TYPE = 'redis'
+    app.config['SESSION_TYPE'] = 'redis'
     app.config['SESSION_REDIS'] = redis.from_url(os.environ.get('REDIS_URL'))
     sess = Session()
     sess.init_app(app)
