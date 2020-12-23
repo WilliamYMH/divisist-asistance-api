@@ -15,6 +15,7 @@ class Config(object):
 class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    ENV = "production"
     
 class DevelopmentConfig(Config):
     ENV = "development"

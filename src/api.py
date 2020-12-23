@@ -49,6 +49,7 @@ def login():
         return jsonify(succes=False)
 
 @app.route("/api/v1.0/logout", methods=['POST'])
+@cross_origin()
 def logout():
     session.clear()
     session["user"] = "unknown"
@@ -57,6 +58,7 @@ def logout():
 
 
 @app.route('/api/v1.0/get-notas-materias', methods=['GET'])
+@cross_origin()
 def get_notas_materias():
     try:
         usuario = session["usuario"]
@@ -92,6 +94,7 @@ def get_notas_materias():
     return jsonify(succes=False)
 
 @app.route("/api/v1.0/get-nota-by-voice", methods=['POST'])
+@cross_origin()
 def get_nota_by_voice():
     data = request.json.get('data')
     value = request.json.get('value')    
