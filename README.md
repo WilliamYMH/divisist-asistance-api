@@ -1,6 +1,10 @@
 # Api endpoint - Divisist Asistance
 
 Proyecto simple que haciendo uso de webscrapping, consulta las notas de las materias de un estudiante.
+
+Url:
+https://quick-function-285821.uc.r.appspot.com/
+
 -Endpoints:
 ```
 [POST]
